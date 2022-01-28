@@ -41,6 +41,13 @@ fanfiction_df <- read_csv("SomeTextLong.csv")
 fanfiction_names_df <- read_csv("SomeNameLong.csv")
 lor_all_files <- read_csv("TextsAboutLOR.csv")
 ```
+```{r metadata}
+
+metadata <- fanfiction_names_df %>% 
+            left_join((fanfiction_df %>% select(!(Content))))
+
+write_csv(metadata, "metadata.csv")
+```
 
 ## Corpus Overview
 
@@ -266,7 +273,7 @@ write_csv(ngram_top_thousand, paste("ngram_top_thousand_",date,".csv", sep = "")
 Measuring distinct words in a corpus is complex. Heaps' law indicates that the number of unique words is the inverse square of the total number of words. That is as texts get longer their unique words go down because there are only so many words in the English language. A better measure is ![tf-idf](https://en.wikipedia.org/wiki/Tf%E2%80%93idf). The code below does this for the entire corpus, but fetches a lot of false positives, because what it sees as "unique" are actually scraping errors. It's a good way to figure out what will need to be cleaned from the corpus.
 
 
-```{r clean_book_words, echo=TRUE, cache=TRUE}
+```{r clean_book_words, echo=TRUE, cache=FALSE}
 #Create a clean list of the count of each word in the corpus with contractions removed and possessives stripped, i.e. remove 's.
 
 book_words_clean <- fanfiction_df_small %>% 
