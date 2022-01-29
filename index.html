@@ -458,11 +458,13 @@ A story set in the Feud universe featuring young Legolas. Maltahondo appears as 
 </tbody>
 <tr>
 <td colspan="5" style="text-align: left;">
-Top 100 words based on Type-Token Ratio. Text’s closer to 1 are more lexically rich.
+Top 10 words based on Type-Token Ratio. Text’s closer to 1 are more lexically rich.
 </td>
 </tr>
 </table>
-<p>##NGRAM</p>
+</div>
+<div id="ngram" class="section level2">
+<h2>NGRAM</h2>
 <p>Ngrams had to be created in chunks to account for the heavy memory usage.</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>ngram_df <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(fanfiction_df_small)) {</span>
@@ -520,32 +522,594 @@ Top 100 words based on Type-Token Ratio. Text’s closer to 1 are more lexically
 ## [1] &quot;Now processing text 8000 of8717&quot;
 ## [1] &quot;Now processing text 8250 of8717&quot;
 ## [1] &quot;Now processing text 8500 of8717&quot;</code></pre>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Top 100 bigram</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a> </span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co"># #ngram_filtered &lt;- ngram_df %&gt;% </span></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   separate(bigram, c(&quot;word1&quot;, &quot;word2&quot;), sep = &quot; &quot;)</span></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="co"># ngram_filtered &lt;- ngram_filtered %&gt;% </span></span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co">#   filter(!word1 %in% stop_words$word) %&gt;%</span></span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="co">#   filter(!word2 %in% stop_words$word)</span></span>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>ngram_total <span class="ot">&lt;-</span> ngram_df <span class="sc">%&gt;%</span> </span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(bigram) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">total_bigrams =</span> <span class="fu">sum</span>(n)) </span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>ngram_top_thousand <span class="ot">&lt;-</span> ngram_total <span class="sc">%&gt;%</span> </span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">arrange</span>(<span class="fu">desc</span>(total_bigrams)) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">top_n</span>(<span class="at">n=</span><span class="dv">1000</span>)</span>
 <span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="co"># new bigram counts:</span></span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>ngram_total <span class="ot">&lt;-</span> ngram_df <span class="sc">%&gt;%</span> </span>
-<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(bigram) <span class="sc">%&gt;%</span> </span>
-<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">total_bigrams =</span> <span class="fu">sum</span>(n)) </span>
-<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>ngram_top_thousand <span class="ot">&lt;-</span> ngram_total <span class="sc">%&gt;%</span> </span>
-<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">arrange</span>(<span class="fu">desc</span>(total_bigrams)) <span class="sc">%&gt;%</span> </span>
-<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">top_n</span>(<span class="at">n=</span><span class="dv">1000</span>)</span>
-<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>ngram_top_ten_table <span class="ot">&lt;-</span> ngram_top_thousand <span class="sc">%&gt;%</span> </span>
-<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">top_n</span>(<span class="at">n=</span><span class="dv">10</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">addHtmlTableStyle</span>(<span class="at">col.rgroup =</span> <span class="fu">c</span>(<span class="st">&quot;none&quot;</span>, <span class="st">&quot;#F5FBFF&quot;</span>),</span>
-<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>                    <span class="at">pos.caption =</span> <span class="st">&quot;bottom&quot;</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">htmlTable</span>(<span class="at">caption =</span> <span class="st">&quot;Top 10 ngrams&quot;</span>)</span></code></pre></div>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>ngram_top_ten_table <span class="ot">&lt;-</span> ngram_top_thousand <span class="sc">%&gt;%</span> </span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">top_n</span>(<span class="at">n=</span><span class="dv">50</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>                <span class="fu">addHtmlTableStyle</span>(<span class="at">col.rgroup =</span> <span class="fu">c</span>(<span class="st">&quot;none&quot;</span>, <span class="st">&quot;#F5FBFF&quot;</span>),</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>                    <span class="at">pos.caption =</span> <span class="st">&quot;bottom&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">htmlTable</span>(<span class="at">caption =</span> <span class="st">&quot;Top 50 ngrams&quot;</span>)</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>ngram_top_ten_table</span></code></pre></div>
+<table class="gmisc_table" style="border-collapse: collapse; margin-top: 1em; margin-bottom: 1em;">
+<thead>
+<tr>
+<th style="border-bottom: 1px solid grey; border-top: 2px solid grey;">
+</th>
+<th style="font-weight: 900; border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;">
+bigram
+</th>
+<th style="font-weight: 900; border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;">
+total_bigrams
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">
+1
+</td>
+<td style="text-align: center;">
+chapter text
+</td>
+<td style="text-align: center;">
+37274
+</td>
+</tr>
+<tr style="background-color: #f5fbff;">
+<td style="background-color: #f5fbff; text-align: left;">
+2
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+middle earth
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+17822
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+3
+</td>
+<td style="text-align: center;">
+lord elrond
+</td>
+<td style="text-align: center;">
+14172
+</td>
+</tr>
+<tr style="background-color: #f5fbff;">
+<td style="background-color: #f5fbff; text-align: left;">
+4
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+blue eyes
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+10791
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+5
+</td>
+<td style="text-align: center;">
+deep breath
+</td>
+<td style="text-align: center;">
+9717
+</td>
+</tr>
+<tr style="background-color: #f5fbff;">
+<td style="background-color: #f5fbff; text-align: left;">
+6
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+minas tirith
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+9329
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+7
+</td>
+<td style="text-align: center;">
+notes chapter
+</td>
+<td style="text-align: center;">
+9237
+</td>
+</tr>
+<tr style="background-color: #f5fbff;">
+<td style="background-color: #f5fbff; text-align: left;">
+8
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+king thranduil
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+6437
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+9
+</td>
+<td style="text-align: center;">
+legolas looked
+</td>
+<td style="text-align: center;">
+5901
+</td>
+</tr>
+<tr style="background-color: #f5fbff;">
+<td style="background-color: #f5fbff; text-align: left;">
+10
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+eyes widened
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+5359
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+11
+</td>
+<td style="text-align: center;">
+woodland realm
+</td>
+<td style="text-align: center;">
+4918
+</td>
+</tr>
+<tr style="background-color: #f5fbff;">
+<td style="background-color: #f5fbff; text-align: left;">
+12
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+lady galadriel
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+4894
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+13
+</td>
+<td style="text-align: center;">
+wood elf
+</td>
+<td style="text-align: center;">
+4758
+</td>
+</tr>
+<tr style="background-color: #f5fbff;">
+<td style="background-color: #f5fbff; text-align: left;">
+14
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+legolas smiled
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+4263
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+15
+</td>
+<td style="text-align: center;">
+legolas nodded
+</td>
+<td style="text-align: center;">
+4093
+</td>
+</tr>
+<tr style="background-color: #f5fbff;">
+<td style="background-color: #f5fbff; text-align: left;">
+16
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+thorin oakenshield
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+3970
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+17
+</td>
+<td style="text-align: center;">
+prince legolas
+</td>
+<td style="text-align: center;">
+3784
+</td>
+</tr>
+<tr style="background-color: #f5fbff;">
+<td style="background-color: #f5fbff; text-align: left;">
+18
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+stepped forward
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+3523
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+19
+</td>
+<td style="text-align: center;">
+elven king
+</td>
+<td style="text-align: center;">
+3442
+</td>
+</tr>
+<tr style="background-color: #f5fbff;">
+<td style="background-color: #f5fbff; text-align: left;">
+20
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+bilbo baggins
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+3358
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+21
+</td>
+<td style="text-align: center;">
+uruk hai
+</td>
+<td style="text-align: center;">
+3296
+</td>
+</tr>
+<tr style="background-color: #f5fbff;">
+<td style="background-color: #f5fbff; text-align: left;">
+22
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+dol guldur
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+3137
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+23
+</td>
+<td style="text-align: center;">
+lake town
+</td>
+<td style="text-align: center;">
+3041
+</td>
+</tr>
+<tr style="background-color: #f5fbff;">
+<td style="background-color: #f5fbff; text-align: left;">
+24
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+dark haired
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+2925
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+25
+</td>
+<td style="text-align: center;">
+leaned forward
+</td>
+<td style="text-align: center;">
+2870
+</td>
+</tr>
+<tr style="background-color: #f5fbff;">
+<td style="background-color: #f5fbff; text-align: left;">
+26
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+thranduil looked
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+2745
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+27
+</td>
+<td style="text-align: center;">
+master baggins
+</td>
+<td style="text-align: center;">
+2734
+</td>
+</tr>
+<tr style="background-color: #f5fbff;">
+<td style="background-color: #f5fbff; text-align: left;">
+28
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+dark lord
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+2713
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+29
+</td>
+<td style="text-align: center;">
+elf lord
+</td>
+<td style="text-align: center;">
+2663
+</td>
+</tr>
+<tr style="background-color: #f5fbff;">
+<td style="background-color: #f5fbff; text-align: left;">
+30
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+text chapter
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+2651
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+31
+</td>
+<td style="text-align: center;">
+legolas replied
+</td>
+<td style="text-align: center;">
+2551
+</td>
+</tr>
+<tr style="background-color: #f5fbff;">
+<td style="background-color: #f5fbff; text-align: left;">
+32
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+legolas eyes
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+2536
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+33
+</td>
+<td style="text-align: center;">
+wood elves
+</td>
+<td style="text-align: center;">
+2525
+</td>
+</tr>
+<tr style="background-color: #f5fbff;">
+<td style="background-color: #f5fbff; text-align: left;">
+34
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+lonely mountain
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+2495
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+35
+</td>
+<td style="text-align: center;">
+grey eyes
+</td>
+<td style="text-align: center;">
+2449
+</td>
+</tr>
+<tr style="background-color: #f5fbff;">
+<td style="background-color: #f5fbff; text-align: left;">
+36
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+eyes wide
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+2394
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+37
+</td>
+<td style="text-align: center;">
+gil galad
+</td>
+<td style="text-align: center;">
+2362
+</td>
+</tr>
+<tr style="background-color: #f5fbff;">
+<td style="background-color: #f5fbff; text-align: left;">
+38
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+thranduil smiled
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+2325
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+39
+</td>
+<td style="text-align: center;">
+thorin looked
+</td>
+<td style="text-align: center;">
+2307
+</td>
+</tr>
+<tr style="background-color: #f5fbff;">
+<td style="background-color: #f5fbff; text-align: left;">
+40
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+haired elf
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+2303
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+41
+</td>
+<td style="text-align: center;">
+green eyes
+</td>
+<td style="text-align: center;">
+2223
+</td>
+</tr>
+<tr style="background-color: #f5fbff;">
+<td style="background-color: #f5fbff; text-align: left;">
+42
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+legolas sighed
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+2205
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+43
+</td>
+<td style="text-align: center;">
+golden hair
+</td>
+<td style="text-align: center;">
+2202
+</td>
+</tr>
+<tr style="background-color: #f5fbff;">
+<td style="background-color: #f5fbff; text-align: left;">
+44
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+misty mountains
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+2201
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+45
+</td>
+<td style="text-align: center;">
+elven prince
+</td>
+<td style="text-align: center;">
+2060
+</td>
+</tr>
+<tr style="background-color: #f5fbff;">
+<td style="background-color: #f5fbff; text-align: left;">
+46
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+eyes closed
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+2044
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+47
+</td>
+<td style="text-align: center;">
+mellon nin
+</td>
+<td style="text-align: center;">
+2012
+</td>
+</tr>
+<tr style="background-color: #f5fbff;">
+<td style="background-color: #f5fbff; text-align: left;">
+48
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+dark hair
+</td>
+<td style="background-color: #f5fbff; text-align: center;">
+1987
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+49
+</td>
+<td style="text-align: center;">
+lord celeborn
+</td>
+<td style="text-align: center;">
+1963
+</td>
+</tr>
+<tr style="background-color: #f5fbff;">
+<td style="background-color: #f5fbff; border-bottom: 2px solid grey; text-align: left;">
+50
+</td>
+<td style="background-color: #f5fbff; border-bottom: 2px solid grey; text-align: center;">
+swallowed hard
+</td>
+<td style="background-color: #f5fbff; border-bottom: 2px solid grey; text-align: center;">
+1941
+</td>
+</tr>
+</tbody>
+<tr>
+<td colspan="3" style="text-align: left;">
+Top 50 ngrams
+</td>
+</tr>
+</table>
 </div>
 <div id="distinct-words" class="section level2">
 <h2>Distinct words</h2>
@@ -567,55 +1131,42 @@ Top 100 words based on Type-Token Ratio. Text’s closer to 1 are more lexically
 <span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>book_words_punctuation_extended <span class="ot">&lt;-</span> book_words_punctuation <span class="sc">%&gt;%</span> </span>
 <span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>                          <span class="fu">mutate</span>(<span class="at">word =</span> <span class="fu">str_remove_all</span>(word,<span class="st">&quot;[&#39;’.]&quot;</span>)) <span class="sc">%&gt;%</span> </span>
 <span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>                          <span class="fu">mutate</span>(<span class="at">word =</span> <span class="fu">str_remove_all</span>(word, <span class="st">&quot; s&quot;</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>                          <span class="fu">separate_rows</span>(word, <span class="at">sep =</span> <span class="st">&quot; &quot;</span>) </span>
-<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(book_words_clean)</span>
-<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(book_words_punctuation)</span>
-<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a><span class="fu">gc</span>()</span></code></pre></div>
-<pre><code>##             used   (Mb) gc trigger   (Mb)  max used   (Mb)
-## Ncells   3672023  196.2   22547720 1204.2  28184650 1505.3
-## Vcells 360304335 2749.0  975209451 7440.3 975209396 7440.3</code></pre>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>book_words_final <span class="ot">&lt;-</span> book_words_clean_filtered <span class="sc">%&gt;%</span> </span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>                    <span class="fu">bind_rows</span>(book_words_punctuation_extended)</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(book_words_clean_filtered, book_words_punctuation_extended)</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="fu">gc</span>()</span></code></pre></div>
-<pre><code>##             used   (Mb) gc trigger   (Mb)  max used   (Mb)
-## Ncells   3672188  196.2   18038176  963.4  28184650 1505.3
-## Vcells 360304657 2749.0  975209451 7440.3 975209396 7440.3</code></pre>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>book_words_final <span class="ot">&lt;-</span> book_words_final <span class="sc">%&gt;%</span> </span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>                    <span class="fu">count</span>(ID, word, <span class="at">name =</span> <span class="st">&quot;nr_words&quot;</span>, <span class="at">sort =</span> <span class="cn">TRUE</span>) </span></code></pre></div>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>                          <span class="fu">separate_rows</span>(word, <span class="at">sep =</span> <span class="st">&quot; &quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>book_words_final <span class="ot">&lt;-</span> book_words_clean_filtered <span class="sc">%&gt;%</span> </span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>                    <span class="fu">bind_rows</span>(book_words_punctuation_extended)</span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>book_words_final <span class="ot">&lt;-</span> book_words_final <span class="sc">%&gt;%</span> </span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>                    <span class="fu">count</span>(ID, word, <span class="at">name =</span> <span class="st">&quot;nr_words&quot;</span>, <span class="at">sort =</span> <span class="cn">TRUE</span>) </span></code></pre></div>
 <p>Get the total number of words by work.</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>total_words <span class="ot">&lt;-</span> book_words_final <span class="sc">%&gt;%</span> </span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(ID) <span class="sc">%&gt;%</span> </span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">total =</span> <span class="fu">sum</span>(nr_words))</span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>total_words <span class="ot">&lt;-</span> book_words_final <span class="sc">%&gt;%</span> </span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(ID) <span class="sc">%&gt;%</span> </span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">total =</span> <span class="fu">sum</span>(nr_words))</span></code></pre></div>
 <p>Add the totals to the book_words tibble.</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>book_words_total <span class="ot">&lt;-</span> <span class="fu">left_join</span>(book_words_final, total_words) </span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>book_words_total <span class="ot">&lt;-</span> <span class="fu">left_join</span>(book_words_final, total_words) </span></code></pre></div>
 <p>Now calculate the tf_idf</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>book_tf_idf <span class="ot">&lt;-</span> book_words_total <span class="sc">%&gt;%</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_tf_idf</span>(word, ID, nr_words)</span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>book_tf_idf <span class="ot">&lt;-</span> book_words_total <span class="sc">%&gt;%</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_tf_idf</span>(word, ID, nr_words)</span></code></pre></div>
 <div id="tf_idf-table" class="section level3">
 <h3>TF_IDF table</h3>
 <p>Thsi table needs to be joined back with the metadata to make some sense of it.</p>
 <p>Get the top 3 distinct words for each book. This is still a lot of data to look through, but it might give an indication as to what is important about each work.</p>
 <p>Join the metadata back to the distinct words table.</p>
 <p>Distinct words of the corpus.</p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>distinct_words_total <span class="ot">&lt;-</span> distinct_words <span class="sc">%&gt;%</span> </span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">anti_join</span>(stop_words) <span class="sc">%&gt;%</span> </span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(word) <span class="sc">%&gt;%</span> </span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">total_words =</span> <span class="fu">sum</span>(nr_words)) <span class="sc">%&gt;%</span> </span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(total_words))</span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>distinct_words_total_table <span class="ot">&lt;-</span> distinct_words_total <span class="sc">%&gt;%</span> </span>
-<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>                              <span class="fu">top_n</span>(total_words, <span class="at">n=</span> <span class="dv">50</span>) </span>
-<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>distinct_words_total_table <span class="sc">%&gt;%</span> </span>
-<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">addHtmlTableStyle</span>(<span class="at">col.rgroup =</span> <span class="fu">c</span>(<span class="st">&quot;none&quot;</span>, <span class="st">&quot;#F5FBFF&quot;</span>),</span>
-<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>                    <span class="at">pos.caption =</span> <span class="st">&quot;bottom&quot;</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">htmlTable</span>(<span class="at">header =</span> <span class="fu">c</span>(<span class="st">&quot;Word&quot;</span>, <span class="st">&quot;Total Occurrences&quot;</span>),</span>
-<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>            <span class="at">caption =</span> <span class="st">&quot;Top 50 unique words in the corpus by number or occurrences&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>distinct_words_total <span class="ot">&lt;-</span> distinct_words <span class="sc">%&gt;%</span> </span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">anti_join</span>(stop_words) <span class="sc">%&gt;%</span> </span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(word) <span class="sc">%&gt;%</span> </span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">total_words =</span> <span class="fu">sum</span>(nr_words)) <span class="sc">%&gt;%</span> </span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(total_words))</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>distinct_words_total_table <span class="ot">&lt;-</span> distinct_words_total <span class="sc">%&gt;%</span> </span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>                              <span class="fu">top_n</span>(total_words, <span class="at">n=</span> <span class="dv">50</span>) </span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>distinct_words_total_table <span class="sc">%&gt;%</span> </span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">addHtmlTableStyle</span>(<span class="at">col.rgroup =</span> <span class="fu">c</span>(<span class="st">&quot;none&quot;</span>, <span class="st">&quot;#F5FBFF&quot;</span>),</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>                    <span class="at">pos.caption =</span> <span class="st">&quot;bottom&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">htmlTable</span>(<span class="at">header =</span> <span class="fu">c</span>(<span class="st">&quot;Word&quot;</span>, <span class="st">&quot;Total Occurrences&quot;</span>),</span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>            <span class="at">caption =</span> <span class="st">&quot;Top 50 unique words in the corpus by number or occurrences&quot;</span>)</span></code></pre></div>
 <table class="gmisc_table" style="border-collapse: collapse; margin-top: 1em; margin-bottom: 1em;">
 <thead>
 <tr>
@@ -1203,6 +1754,7 @@ Top 50 unique words in the corpus by number or occurrences
        <li><a href="#generate-descriptive-statistics">Generate descriptive statistics</a></li>
        <li><a href="#tokenizing">Tokenizing</a></li>
        <li><a href="#ttr-table">TTR Table</a></li>
+       <li><a href="#ngram">NGRAM</a></li>
        <li><a href="#distinct-words">Distinct words</a></li>
        </ul>
      </div>
