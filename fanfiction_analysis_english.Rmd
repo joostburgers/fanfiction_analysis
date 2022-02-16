@@ -418,3 +418,70 @@ write_csv(distinct_words_total_table, paste("distinct_words_total",date,".csv", 
 ```
 
 
+```{r meta_data_unnest}
+
+common_pairings <- metadata %>% 
+                   group_by(ID) %>% 
+                   separate_rows(Pairing, sep = ",") %>% 
+                   mutate(Pairing = str_trim(Pairing)) %>% 
+                   ungroup() %>% 
+                   group_by(Pairing) %>% 
+                   count()
+
+common_pairings %>% 
+ ggplot(aes(x=reorder(Pairing, n), y = n, fill = Pairing))+
+  geom_bar(stat="identity")+
+           labs(title = "Most Common Pairing",
+       x = "Pairing",
+       y = "Stories with this Pairing"
+       )
+```
+
+```{r common_tags}
+common_tags <- metadata %>% 
+                   group_by(ID) %>% 
+                   separate_rows(Tags, sep = ",") %>% 
+                   mutate(Tags = str_trim(Tags)) %>% 
+                   ungroup() %>% 
+                   group_by(Tags) %>% 
+                   count() %>% 
+                   ungroup() %>% 
+                   top_n(50) %>% 
+                   arrange(desc(n))
+
+htmlTable(common_tags)
+```
+```{r common_warnings}
+common_warnings <- metadata %>% 
+                   group_by(ID) %>% 
+                   separate_rows(Warning, sep = ",") %>% 
+                   mutate(Warning = str_trim(Warning)) %>% 
+                   ungroup() %>% 
+                   group_by(Warning) %>% 
+                   count() %>% 
+                   ungroup() %>% 
+                   top_n(50) %>% 
+                   arrange(desc(n))
+
+common_warnings %>% 
+ ggplot(aes(x=reorder(Warning, n), y = n, fill = Warning))+
+  geom_bar(stat="identity")+
+           labs(title = "Most Common Warning",
+       x = "Warning",
+       y = "Stories with this Warning"
+       )
+```
+```{r top_comments}
+
+comments_per_day <- metadata %>% 
+                    mutate(days = Sys.Date() - as.Date(Date_published)) %>% 
+                    mutate(across(starts_with("Num_"),~.x/as.numeric(days), .names = "{.col}_per_day"))
+
+
+```
+
+
+```{r}
+write_csv(comments_per_day, "stats_by_days.csv")
+```
+
