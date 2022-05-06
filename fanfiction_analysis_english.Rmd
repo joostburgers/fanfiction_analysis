@@ -99,6 +99,98 @@ fanfiction_names_df <- read_csv("SomeNameLong.csv")
 lor_all_files <- read_csv("TextsAboutLOR.csv")
 ```
 
+```{r eval=FALSE, include=FALSE}
+trial_comments <- read_csv("comments/Comments1.csv")
+
+comments_full <- trial_comments %>% 
+                  separate_rows(Comments, sep = "\\+++")
+```
+
+
+
+```{r get_comments, eval=FALSE, include=FALSE}
+
+files <- dir(path = "comments/", pattern = "*.csv")
+comments_temp = NULL
+comments_full = NULL
+
+
+comments_temp <- files[1:300] %>% 
+                map(~ read_csv(file.path("comments", .), show_col_types = FALSE) %>% 
+                    separate_rows(Comments, sep = "\\+++")) %>%    
+                   reduce(rbind)
+
+
+
+```
+
+```{r eval=FALSE, include=FALSE}
+
+comments_remainder <-  files[301:481] %>% 
+                map(~ read.csv(file.path("comments", .)) %>% 
+                    separate_rows(Comments, sep = "\\+++")) %>%
+                    reduce(rbind) %>% 
+                    drop_na()
+```
+
+
+
+```{r echo=FALSE}
+comments_all <-  files %>% 
+                map(~ read.csv(file.path("comments", .)) %>% 
+                    separate_rows(Comments, sep = "\\+++")) %>%
+                    reduce(rbind) %>% 
+                    drop_na()
+```
+
+
+```{r comments_count}
+comments_summary <- fanfiction_names_df %>% 
+                    mutate (total = sum(Num_comments), percent = Num_comments/sum(Num_comments), mean = mean(Num_comments)) %>% 
+                    select(Title:ID, Num_comments, total:mean) %>% 
+                  top_n(percent, n=100)
+
+```
+
+
+## Surabhi Stats
+
+### Total Comments and Percent
+
+```{r}
+comments_summary
+```
+
+### Texts greater 1 like per day
+
+```{r}
+likes_per_day <- metadata %>% 
+                  select(-Num_chapters) %>% 
+  mutate(across(starts_with("Num_"),  ~ .x / as.numeric(Sys.Date() - as.Date(Date_published)), .names = "per_day_{.col}")) %>% 
+                  filter(per_day_Num_hits>1) %>%
+                  select(Title:ID, per_day_Num_hits)
+
+```
+
+In total, `r nrow(likes_per_day` have more than one like per day.
+
+```{r}
+likes_per_day %>% 
+  top_n(100)  %>% 
+  arrange(desc(per_day_Num_hits))
+```
+
+
+
+```{r eval=FALSE, include=FALSE}
+bigrams <- comments_all %>% 
+           unnest_ngrams(word, Comments, n = 2) %>% 
+           count(word)
+
+
+```
+
+
 ```{r metadata}
 
 metadata <- fanfiction_names_df %>% 
@@ -1191,5 +1283,28 @@ Distinct words of the corpus.
 #                   mutate (value = 1, Warning = str_squish(Warning)) %>% 
 #                   ungroup() %>%  
 #                   pivot_wider(names_from = Warning, values_from = 1, values_fill = 0)
+```
+
+
+## Fluff fiction analysis
+
+The following section runs all of the same algorithms on the corpus, but it filters out specifically all texts that are less than 4000 words and have been tagged with "fluff"
+
+
+```{r}
+fanfiction_title_author <-  fanfiction_df_small %>% 
+                            left_join(fanfiction_names_df) %>% 
+                            select(ID:Author)
+                            
+```
+```{r}
+for (i in 1:nrow(fanfiction_title_author)){ 
+author <- str_replace_all(fanfiction_title_author$Author[i], "[[:punct:]]", " ")
+title <-  str_extract(str_sub(fanfiction_title_author$Title[i],1, 25),"[:alpha:]+")
+
+print(c(author,title))
+file_name <- paste(author,title,".txt", sep="_")
+write_file(fanfiction_title_author$Content[i], file.path("raw_texts",file_name))
+}
 ```
 
